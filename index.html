@@ -7,76 +7,83 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="small">Make this window at least 1100 × 740 to show the editor.</div>
 <div class="app">
   <header class="topbar">
+    <button id="windows-open" class="windows-tab" title="Add a window">Windows</button>
     <b class="brand">Zaude</b>
-    <nav id="tabs" class="tabs" aria-label="Pages"></nav>
+    <button id="open-zd" title="Open a self-contained .zd project (Ctrl+O)">Open .zd</button>
+    <button id="save-zd" title="Save self-contained .zd project with all media (Ctrl+S · Shift+Ctrl+S for Save As)">Save .zd</button>
     <div class="grow"></div>
-    <button class="ai" disabled title="AI features come later">Help: ask the editor</button>
-    <button class="ai" disabled title="AI features come later">All AI commands</button>
+    <button id="t2v-open" class="ai" title="Generate a clip from a text prompt">Text to video</button>
+    <button id="remote-open">Remote machines</button>
+    <button id="update-btn" title="Check for updates">Check for updates</button>
     <button id="export-top" class="primary" data-action="export">Export</button>
   </header>
-
-  <div class="upper">
-    <div class="monitor-wrap">
-      <div class="monitor" role="img" aria-label="Program monitor">
-        <span class="mon-l">Program · 1920 × 1080</span>
-        <span class="mon-r" id="page-name"></span>
-        <span class="mon-c" id="preview-text"></span>
-      </div>
-      <div class="transport">
-        <button data-action="play" id="play-btn" aria-label="Play" style="width:44px">▶</button>
-        <span id="timecode" class="tc"></span>
-        <div class="grow"></div>
-        <span class="lbl">Last action</span>
-        <span id="log" class="log" aria-live="polite"></span>
-      </div>
-    </div>
-    <div class="controls">
-      <div class="controls-head">
-        <span class="lbl" id="controls-label"></span>
-        <span class="muted" id="selected-label"></span>
-      </div>
-      <div id="tools" class="tools"></div>
-      <div class="hint">Click a clip to select it. Then hold Ctrl and two-finger swipe to change its length, Shift to move it, or Alt to slip its media. Zoom with + / − or Fit.</div>
-    </div>
-  </div>
-
-  <section class="timeline" aria-label="Timeline">
-    <div class="tl-body">
-      <div class="labels">
-        <div class="tlbl">Video 2</div>
-        <div class="tlbl">Video 1</div>
-        <div class="tlbl">Audio 1</div>
-        <div class="tlbl">Audio 2</div>
-      </div>
-      <div class="scroller" id="scroller">
-        <div id="canvas" class="canvas">
-          <div id="ruler" class="ruler" aria-label="Ruler; click to move playhead"></div>
-          <div id="tracks" class="tracks"></div>
-          <div id="playhead" class="playhead" aria-hidden="true"></div>
-        </div>
-      </div>
-    </div>
-    <div class="tl-bar">
-      <button data-action="undo" aria-label="Undo" title="Undo">↶</button>
-      <button data-action="redo" aria-label="Redo" title="Redo">↷</button>
-      <span class="sep"></span>
-      <button data-action="split" aria-label="Split at playhead" title="Split at playhead">✂ Split</button>
-      <button data-action="trim" aria-label="Trim end to playhead" title="Trim end to playhead">Trim</button>
-      <button data-action="delete" aria-label="Delete" title="Delete">Delete</button>
-      <button data-action="duplicate" aria-label="Duplicate" title="Duplicate">Duplicate</button>
-      <button data-action="snap" id="snap-btn" aria-label="Magnetic snap" title="Magnetic snap">Snap</button>
-      <span class="sep"></span>
-      <button data-action="zoomOut" aria-label="Zoom out timeline" title="Zoom out (−)">−</button>
-      <button data-action="zoomIn" aria-label="Zoom in timeline" title="Zoom in (+)">+</button>
-      <button data-action="fit" aria-label="Fit timeline" title="Fit whole timeline">Fit</button>
-      <div class="grow"></div>
-      <span class="muted" id="tl-info"></span>
-    </div>
-  </section>
+  <main id="workspace" class="workspace"></main>
 </div>
-<script type="module" src="src/app.js"></script>
+
+<div id="remote-dialog" class="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rm-title">
+    <div class="modal-head">
+      <h2 id="rm-title">Remote machines</h2>
+      <button id="rm-close">Close</button>
+    </div>
+    <div id="rm-message" class="rm-msg" aria-live="polite"></div>
+    <div id="rm-body"></div>
+  </div>
+</div>
+
+<div id="t2v-dialog" class="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="t2v-title">
+    <div class="modal-head">
+      <h2 id="t2v-title">Text to video</h2>
+      <button id="t2v-close">Close</button>
+    </div>
+    <form id="t2v-form" class="t2v-form">
+      <label class="t2v-wide">Prompt
+        <textarea name="prompt" rows="4" maxlength="4000" placeholder="e.g. A red sailboat rocks gently on blue water, locked-off wide shot" required></textarea>
+      </label>
+      <label>Length (seconds)
+        <input name="seconds" type="number" min="1" max="60" step="1" value="2" required>
+      </label>
+      <label>Resolution
+        <select name="resolution">
+          <option value="320" selected>320p</option>
+          <option value="480">480p · 854 × 480</option>
+          <option value="640">640p · 1138 × 640</option>
+          <option value="720">720p · 1280 × 720</option>
+        </select>
+      </label>
+      <label>Quality
+        <select name="quality">
+          <option value="draft">Draft · fastest</option>
+          <option value="normal" selected>Normal</option>
+          <option value="ultra">Ultra · slowest, most detail</option>
+        </select>
+      </label>
+      <label>Steps
+        <input name="steps" type="number" min="1" max="100" step="1" value="4" placeholder="auto">
+      </label>
+      <label>Aspect
+        <input value="16:9 (project default)" disabled>
+      </label>
+      <label class="t2v-wide">Mannimmate folder
+        <input name="mannimmateDir" autocomplete="off">
+      </label>
+      <div class="t2v-wide t2v-actions">
+        <button type="submit" class="ai" id="t2v-generate">Generate</button>
+        <button type="button" id="t2v-cancel" disabled>Cancel render</button>
+      </div>
+    </form>
+    <div id="t2v-status" class="t2v-status" aria-live="polite"></div>
+    <div id="t2v-progress" class="t2v-progress" hidden><div id="t2v-bar"></div></div>
+    <div id="t2v-result" class="t2v-result"></div>
+  </div>
+</div>
+
+<script type="module" src="src/main.js"></script>
+<script type="module" src="src/remote-ui.js"></script>
+<script type="module" src="src/ai-ui.js"></script>
+<script type="module" src="src/update-ui.js"></script>
 </body>
 </html>

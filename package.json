@@ -1,10 +1,77 @@
 {
   "name": "zaude",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
+  "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
     "start": "python3 -m http.server 8080",
-    "test": "node --test test/"
-  }
+    "desktop": "electron .",
+    "test": "node --test \"test/*.test.js\"",
+    "dist": "electron-builder --publish never"
+  },
+  "devDependencies": {
+    "electron": "^36.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.zaude.app",
+    "productName": "Zaude",
+    "fileAssociations": [
+      {
+        "ext": "zd",
+        "name": "Zaude Project",
+        "description": "Self-contained Zaude video editor project",
+        "mimeType": "application/x-zaude-project"
+      }
+    ],
+    "files": [
+      "electron/**/*",
+      "index.html",
+      "styles.css",
+      "src/**/*",
+      "package.json",
+      "assets/**/*"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Zaude-${version}-windows-x64.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Zaude-${version}-windows-x64-setup.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility",
+      "artifactName": "Zaude-${version}-linux-x86_64.${ext}"
+    },
+    "deb": {
+      "maintainer": "Laude Deflectere",
+      "artifactName": "Zaude-${version}-linux-amd64.${ext}"
+    }
+  },
+  "description": "Video editor interface for Zaude",
+  "author": "Laude Deflectere"
 }
